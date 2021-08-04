@@ -70,9 +70,43 @@ contract TimeVault {
   function createErc20TimeLockDeposit(
     address payable receiver,
     uint256 minimumReleaseTimestamp,
-    IERC20 tokenAddress,
+    IERC20 token,
     uint256 amount
-  ) external {}
+  ) external {
+    require(receiver != address(0), "ERR__INVAID_RECEIVER");
+    require(
+      minimumReleaseTimestamp >= block.timestamp,
+      "ERR__INVALID_TIMESTAMP"
+    );
+    require(
+      token.allowance(msg.sender, address(this)) >= amount,
+      "ERR__INSUFFICIENT_TOKEN_ALLOWANCE"
+    );
+
+    token.safeTransferFrom(msg.sender, address(this), amount);
+
+    address depositor = msg.sender;
+    TimeLockDeposit memory timeLockDeposit = TimeLockDeposit(
+      _nextDepositId,
+      depositor,
+      receiver,
+      token,
+      TimeLockDepositType.ERC20,
+      minimumReleaseTimestamp,
+      amount,
+      false
+    );
+    depositIdToDeposit[timeLockDeposit.depositId] = timeLockDeposit;
+    depositorAddressToDeposits[timeLockDeposit.depositor].push(
+      timeLockDeposit.depositId
+    );
+    receiverAddressToDeposits[timeLockDeposit.receiver].push(
+      timeLockDeposit.depositId
+    );
+    _nextDepositId += 1;
+
+    emit TimeLockDepositCreated(timeLockDeposit.depositId);
+  }
 
   function claimDeposit(uint256 depositId) external {
     require(depositId < _nextDepositId, "ERR__INVALID_DEPOSIT_ID");
@@ -108,5 +142,10 @@ contract TimeVault {
 
   function _claimErc20TimeLockDeposit(TimeLockDeposit memory timeLockDeposit)
     internal
-  {}
+  {
+    timeLockDeposit.erc20token.safeTransfer(
+      timeLockDeposit.receiver,
+      timeLockDeposit.amount
+    );
+  }
 }
