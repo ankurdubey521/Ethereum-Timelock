@@ -1,4 +1,6 @@
 import "@nomiclabs/hardhat-waffle";
+import "@nomiclabs/hardhat-ethers";
+
 import type { HardhatUserConfig } from "hardhat/config";
 
 const config: HardhatUserConfig = {

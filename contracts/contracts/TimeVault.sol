@@ -26,9 +26,9 @@ contract TimeVault {
 
   uint256 private _nextDepositId = 1;
 
-  mapping(uint256 => TimeLockDeposit) private _depositIdToDeposit;
-  mapping(address => uint256[]) private _depositorAddressToDeposits;
-  mapping(address => uint256[]) private _receiverAddressToDeposits;
+  mapping(uint256 => TimeLockDeposit) public depositIdToDeposit;
+  mapping(address => uint256[]) public depositorAddressToDeposits;
+  mapping(address => uint256[]) public receiverAddressToDeposits;
 
   event TimeLockDepositCreated(uint256 depositId);
   event TimeLockDepositClaimed(uint256 depositId);
@@ -55,11 +55,11 @@ contract TimeVault {
       msg.value,
       false
     );
-    _depositIdToDeposit[timeLockDeposit.depositId] = timeLockDeposit;
-    _depositorAddressToDeposits[timeLockDeposit.depositor].push(
+    depositIdToDeposit[timeLockDeposit.depositId] = timeLockDeposit;
+    depositorAddressToDeposits[timeLockDeposit.depositor].push(
       timeLockDeposit.depositId
     );
-    _receiverAddressToDeposits[timeLockDeposit.receiver].push(
+    receiverAddressToDeposits[timeLockDeposit.receiver].push(
       timeLockDeposit.depositId
     );
     _nextDepositId += 1;
@@ -76,21 +76,25 @@ contract TimeVault {
 
   function claimDeposit(uint256 depositId) external {
     require(depositId < _nextDepositId, "ERR__INVALID_DEPOSIT_ID");
-    TimeLockDeposit memory timeLockDeposit = _depositIdToDeposit[depositId];
     require(
-      timeLockDeposit.minimumReleaseTimestamp <= block.timestamp,
+      depositIdToDeposit[depositId].minimumReleaseTimestamp <= block.timestamp,
       "ERR__DEPOSIT_RELEASE_TIME_IN_FUTURE"
     );
-    require(!timeLockDeposit.claimed, "ERR__DEPOSIT_ALREADY_CLAIMED");
+    require(
+      !depositIdToDeposit[depositId].claimed,
+      "ERR__DEPOSIT_ALREADY_CLAIMED"
+    );
 
-    _depositIdToDeposit[depositId].claimed = true;
+    depositIdToDeposit[depositId].claimed = true;
 
-    if (timeLockDeposit.depositType == TimeLockDepositType.ETH) {
-      _claimEthTimeLockDeposit(timeLockDeposit);
-    } else if (timeLockDeposit.depositType == TimeLockDepositType.ERC20) {
-      _claimErc20TimeLockDeposit(timeLockDeposit);
+    if (depositIdToDeposit[depositId].depositType == TimeLockDepositType.ETH) {
+      _claimEthTimeLockDeposit(depositIdToDeposit[depositId]);
+    } else if (
+      depositIdToDeposit[depositId].depositType == TimeLockDepositType.ERC20
+    ) {
+      _claimErc20TimeLockDeposit(depositIdToDeposit[depositId]);
     } else {
-      revert("INTERNAL_ERROR_INVALID_DEPOSIT_TYPE");
+      revert("INTERNAL_ERROR__INVALID_DEPOSIT_TYPE");
     }
 
     emit TimeLockDepositClaimed(depositId);
