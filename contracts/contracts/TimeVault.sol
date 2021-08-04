@@ -4,8 +4,9 @@ pragma solidity ^0.8.0;
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 
-contract TimeVault {
+contract TimeVault is ERC2771Context {
   using SafeERC20 for IERC20;
 
   enum TimeLockDepositType {
@@ -33,10 +34,20 @@ contract TimeVault {
   event TimeLockDepositCreated(uint256 depositId);
   event TimeLockDepositClaimed(uint256 depositId);
 
+  modifier noMetaTransaction() {
+    require(
+      !isTrustedForwarder(msg.sender),
+      "ERR__OPERATION_INCOMPATIBLE_WITH_META_TX"
+    );
+    _;
+  }
+
+  constructor(address trustedForwarder) ERC2771Context(trustedForwarder) {}
+
   function createEthTimeLockDeposit(
     address payable receiver,
     uint256 minimumReleaseTimestamp
-  ) external payable {
+  ) external payable noMetaTransaction {
     require(receiver != address(0), "ERR__INVAID_RECEIVER");
     require(
       minimumReleaseTimestamp >= block.timestamp,
@@ -73,19 +84,20 @@ contract TimeVault {
     IERC20 token,
     uint256 amount
   ) external {
+    address depositor = _msgSender();
+
     require(receiver != address(0), "ERR__INVAID_RECEIVER");
     require(
       minimumReleaseTimestamp >= block.timestamp,
       "ERR__INVALID_TIMESTAMP"
     );
     require(
-      token.allowance(msg.sender, address(this)) >= amount,
+      token.allowance(depositor, address(this)) >= amount,
       "ERR__INSUFFICIENT_TOKEN_ALLOWANCE"
     );
 
-    token.safeTransferFrom(msg.sender, address(this), amount);
+    token.safeTransferFrom(depositor, address(this), amount);
 
-    address depositor = msg.sender;
     TimeLockDeposit memory timeLockDeposit = TimeLockDeposit(
       _nextDepositId,
       depositor,

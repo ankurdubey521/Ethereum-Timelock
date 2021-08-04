@@ -2,7 +2,6 @@ import { ethers } from "hardhat";
 import { expect } from "chai";
 import type { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { keccak256 } from "ethers/lib/utils";
 
 describe("TimeVault", function () {
   let contract: Contract, token: Contract;
@@ -23,7 +22,7 @@ describe("TimeVault", function () {
 
   beforeEach(async () => {
     const ContractFactory = await ethers.getContractFactory("TimeVault");
-    contract = await ContractFactory.deploy();
+    contract = await ContractFactory.deploy(bob.address);
   });
 
   beforeEach(async () => {
