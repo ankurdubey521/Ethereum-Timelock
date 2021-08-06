@@ -29,7 +29,7 @@ contract TimeVault is ERC2771Context {
 
   mapping(uint256 => TimeLockDeposit) public depositIdToDeposit;
   mapping(address => uint256[]) private _depositorAddressToDepositIds;
-  mapping(address => uint256[]) public _receiverAddressToDepositIds;
+  mapping(address => uint256[]) private _receiverAddressToDepositIds;
 
   event TimeLockDepositCreated(uint256 depositId);
   event TimeLockDepositClaimed(uint256 depositId);
