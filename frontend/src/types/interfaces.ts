@@ -1,4 +1,12 @@
 import { ethers } from "ethers";
+import React from "react";
+
+export interface IProviderContext {
+  websocketProvider: ethers.providers.WebSocketProvider;
+  setWebsocketProvider: React.Dispatch<
+    React.SetStateAction<ethers.providers.WebSocketProvider>
+  >;
+}
 
 export enum TimeLockDepositType {
   ERC20,

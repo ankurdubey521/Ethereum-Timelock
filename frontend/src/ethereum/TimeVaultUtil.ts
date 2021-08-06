@@ -20,30 +20,36 @@ export class TimeVaultUtil {
     receiverAddress: string,
     minimumReleaseTimestamp: number,
     value: ethers.BigNumber
-  ) =>
-    await this.contract.createEthTimeLockDeposit(
+  ) => {
+    const { wait } = await this.contract.createEthTimeLockDeposit(
       receiverAddress,
       minimumReleaseTimestamp,
       {
         value,
       }
     );
+    await wait();
+  };
 
   createErc20TimeLockDeposit = async (
     receiverAddress: string,
     minimumReleaseTimestamp: number,
     tokenAddress: string,
     value: ethers.BigNumber
-  ) =>
-    await this.contract.createErc20TimeLockDeposit(
+  ) => {
+    const { wait } = await this.contract.createErc20TimeLockDeposit(
       receiverAddress,
       minimumReleaseTimestamp,
       tokenAddress,
       value
     );
+    await wait();
+  };
 
-  claimDeposit = async (depositId: ethers.BigNumber | number) =>
-    await this.contract.claimDeposit(depositId);
+  claimDeposit = async (depositId: ethers.BigNumber | number) => {
+    const { wait } = await this.contract.claimDeposit(depositId);
+    await wait();
+  };
 
   getDepositsByDepositor = async (
     depositor: string

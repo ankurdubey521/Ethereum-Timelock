@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
@@ -11,9 +11,11 @@ import { ethers } from "ethers";
 
 import { TimeVaultUtil } from "../ethereum/TimeVaultUtil";
 import { ERC20Util } from "../ethereum/ERC20Util";
+import { ProviderContext } from "../context/providercontext";
 
 export default function CreateDepositDialog(): JSX.Element {
   const { library, account } = useWeb3React();
+  const { websocketProvider } = useContext(ProviderContext);
   const signer: ethers.Signer = library.getSigner(account);
   const [open, setOpen] = useState(false);
   const [recipientAddress, setRecipientAddress] = useState<string>("");
@@ -69,12 +71,22 @@ export default function CreateDepositDialog(): JSX.Element {
         actualTokenAmount
       );
 
+      /*      websocketProvider.once(
+        {
+          address: tokenAddress,
+          topics: [ethers.utils.id("Approval(address,address,uint256)")],
+        },
+        async () => { 
+          console.log("called");
+          */
       await timeVaultUtil.createErc20TimeLockDeposit(
         recipientAddress as string,
         Math.floor((unlockDate?.getTime() as number) / 1000),
         tokenAddress as string,
         actualTokenAmount
       );
+      //}
+      //);
     } catch (e) {
       console.error(e);
     }
