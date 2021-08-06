@@ -71,14 +71,6 @@ export default function CreateDepositDialog(): JSX.Element {
         actualTokenAmount
       );
 
-      /*      websocketProvider.once(
-        {
-          address: tokenAddress,
-          topics: [ethers.utils.id("Approval(address,address,uint256)")],
-        },
-        async () => { 
-          console.log("called");
-          */
       await timeVaultUtil.createErc20TimeLockDeposit(
         recipientAddress as string,
         Math.floor((unlockDate?.getTime() as number) / 1000),

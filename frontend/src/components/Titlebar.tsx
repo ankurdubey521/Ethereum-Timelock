@@ -24,12 +24,18 @@ const useStyles = makeStyles((theme) => ({
 export default function Titlebar(): JSX.Element {
   const classes = useStyles();
   const { activate, deactivate, active, account } = useWeb3React();
+  const {
+    activate: biconomyActivate,
+    deactivate: biconomyDeactivate,
+    active: biconomyActive,
+  } = useWeb3React("biconomy");
 
   useEffect(() => {
     (async () => {
       const isAuthorized: boolean = await Injected.isAuthorized();
       if (isAuthorized) {
         await activate(Injected, undefined, true);
+        await biconomyActivate(Injected, undefined, true);
       }
     })();
   }, []);
@@ -51,6 +57,9 @@ export default function Titlebar(): JSX.Element {
             color="inherit"
             onClick={async () => {
               await (active ? deactivate() : activate(Injected));
+              await (biconomyActive
+                ? biconomyDeactivate()
+                : biconomyActivate(Injected));
             }}
           >
             {active ? "Disconnect" : "Connect"}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
@@ -12,6 +12,7 @@ import { useWeb3React } from "@web3-react/core";
 import { ERC20Util } from "../ethereum/ERC20Util";
 import { TimeVaultUtil } from "../ethereum/TimeVaultUtil";
 import { IInboundDepositProps, TimeLockDepositType } from "../types/interfaces";
+import { ProviderContext } from "../context/providercontext";
 
 const useStyles = makeStyles({
   root: {
@@ -31,6 +32,10 @@ const useStyles = makeStyles({
 export default function InboundDepositCard(props: IInboundDepositProps) {
   const classes = useStyles();
   const { library, chainId, account } = useWeb3React();
+  const { library: biconomyLibrary, account: biconomyAccount } =
+    useWeb3React("biconomy");
+  const { biconomyInitialized } = useContext(ProviderContext);
+
   const [decimals, setDecimals] = useState<number | null>(null);
   const [displayAmount, setDisplayAmount] = useState<Decimal | null>(null);
 
@@ -66,8 +71,15 @@ export default function InboundDepositCard(props: IInboundDepositProps) {
   }, [decimals]);
 
   const claim = async () => {
-    const timeVaultUtil = new TimeVaultUtil(library.getSigner(account));
-    await timeVaultUtil.claimDeposit(props.deposit.depositId);
+    //const timeVaultUtil = new TimeVaultUtil(library.getSigner(account));
+    if (biconomyInitialized) {
+      const timeVaultUtil = new TimeVaultUtil(
+        biconomyLibrary.getSigner(biconomyAccount)
+      );
+      await timeVaultUtil.claimDeposit(props.deposit.depositId);
+    } else {
+      console.log("Biconomy Not Initialized");
+    }
   };
 
   return (

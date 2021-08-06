@@ -41,7 +41,7 @@ export default function InboundDepositsList(): JSX.Element {
         </Paper>
       </Grid>
       {inboundDeposits.map((deposit) => (
-        <Grid item xs={12}>
+        <Grid item xs={12} key={deposit.depositId.toNumber()}>
           <InboundDepositCard deposit={deposit} />
         </Grid>
       ))}

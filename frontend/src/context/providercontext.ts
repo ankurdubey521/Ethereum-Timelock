@@ -5,4 +5,5 @@ import type { IProviderContext } from "../types/interfaces";
 export const ProviderContext = createContext<IProviderContext>({
   websocketProvider: new ethers.providers.WebSocketProvider(""),
   setWebsocketProvider: () => {},
+  biconomyInitialized: false,
 });

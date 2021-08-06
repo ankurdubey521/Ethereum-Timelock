@@ -6,6 +6,7 @@ export interface IProviderContext {
   setWebsocketProvider: React.Dispatch<
     React.SetStateAction<ethers.providers.WebSocketProvider>
   >;
+  biconomyInitialized: boolean;
 }
 
 export enum TimeLockDepositType {
