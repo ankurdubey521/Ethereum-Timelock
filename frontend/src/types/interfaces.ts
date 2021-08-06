@@ -14,3 +14,7 @@ export interface ITimeLockDeposit {
   amount: ethers.BigNumber;
   claimed: boolean;
 }
+
+export interface IInboundDepositProps {
+  deposit: ITimeLockDeposit;
+}

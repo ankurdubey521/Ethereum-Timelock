@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Titlebar() {
+export default function Titlebar(): JSX.Element {
   const classes = useStyles();
   const { activate, deactivate, active, account } = useWeb3React();
 

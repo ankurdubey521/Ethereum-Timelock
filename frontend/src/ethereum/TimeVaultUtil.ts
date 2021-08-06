@@ -43,7 +43,7 @@ export class TimeVaultUtil {
     );
 
   claimDeposit = async (depositId: ethers.BigNumber | number) =>
-    await this.contract.claim(depositId);
+    await this.contract.claimDeposit(depositId);
 
   getDepositsByDepositor = async (
     depositor: string

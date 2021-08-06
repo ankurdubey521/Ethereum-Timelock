@@ -12,7 +12,7 @@ import { ethers } from "ethers";
 import { TimeVaultUtil } from "../ethereum/TimeVaultUtil";
 import { ERC20Util } from "../ethereum/ERC20Util";
 
-export default function CreateDepositDialog() {
+export default function CreateDepositDialog(): JSX.Element {
   const { library, account } = useWeb3React();
   const signer: ethers.Signer = library.getSigner(account);
   const [open, setOpen] = useState(false);
@@ -57,20 +57,18 @@ export default function CreateDepositDialog() {
   };
 
   const createErc20Deposit = async () => {
-    const erc20token = new ERC20Util(signer, tokenAddress as string);
-    const decimals = await erc20token.decimals();
-    const actualTokenAmount = ethers.BigNumber.from(
-      new Decimal(amount).mul(new Decimal(10).pow(decimals)).toFixed()
-    );
-    const timeVaultUtil = new TimeVaultUtil(signer);
     try {
-      /*
+      const erc20token = new ERC20Util(signer, tokenAddress as string);
+      const decimals = await erc20token.decimals();
+      const actualTokenAmount = ethers.BigNumber.from(
+        new Decimal(amount).mul(new Decimal(10).pow(decimals)).toFixed()
+      );
+      const timeVaultUtil = new TimeVaultUtil(signer);
       await erc20token.approve(
         process.env.REACT_APP_CONTRACT_ADDRESS as string,
         actualTokenAmount
       );
-      */
-      console.log(actualTokenAmount);
+
       await timeVaultUtil.createErc20TimeLockDeposit(
         recipientAddress as string,
         Math.floor((unlockDate?.getTime() as number) / 1000),
@@ -81,8 +79,6 @@ export default function CreateDepositDialog() {
       console.error(e);
     }
   };
-
-  console.log({ recipientAddress, tokenAddress, unlockDate, amount });
 
   return (
     <div>

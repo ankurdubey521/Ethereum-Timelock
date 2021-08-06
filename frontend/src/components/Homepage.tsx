@@ -1,18 +1,23 @@
 import React, { useState } from "react";
+import Grid from "@material-ui/core/Grid";
 
 import Titlebar from "./Titlebar";
-import { Web3ReactProvider } from "@web3-react/core";
-import { ethers } from "ethers";
+import InboundDepositsList from "./InboundDepositsList";
+import { useWeb3React } from "@web3-react/core";
 
 const Homepage = (): JSX.Element => {
+  const { account } = useWeb3React();
   return (
-    <Web3ReactProvider
-      getLibrary={(provider, connector) =>
-        new ethers.providers.Web3Provider(provider)
-      }
-    >
+    <>
       <Titlebar />
-    </Web3ReactProvider>
+      {account && (
+        <Grid container justifyContent="center">
+          <Grid item xs={4}>
+            <InboundDepositsList />
+          </Grid>
+        </Grid>
+      )}
+    </>
   );
 };
 
