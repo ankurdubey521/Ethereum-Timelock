@@ -28,8 +28,8 @@ contract TimeVault is ERC2771Context {
   uint256 private _nextDepositId = 1;
 
   mapping(uint256 => TimeLockDeposit) public depositIdToDeposit;
-  mapping(address => uint256[]) public depositorAddressToDeposits;
-  mapping(address => uint256[]) public receiverAddressToDeposits;
+  mapping(address => uint256[]) private _depositorAddressToDepositIds;
+  mapping(address => uint256[]) public _receiverAddressToDepositIds;
 
   event TimeLockDepositCreated(uint256 depositId);
   event TimeLockDepositClaimed(uint256 depositId);
@@ -43,6 +43,36 @@ contract TimeVault is ERC2771Context {
   }
 
   constructor(address trustedForwarder) ERC2771Context(trustedForwarder) {}
+
+  function getDepositsByDepositor(address depositor)
+    external
+    view
+    returns (TimeLockDeposit[] memory)
+  {
+    uint256[] memory depositIds = _depositorAddressToDepositIds[depositor];
+    TimeLockDeposit[] memory deposits = new TimeLockDeposit[](
+      depositIds.length
+    );
+    for (uint256 i = 0; i < deposits.length; ++i) {
+      deposits[i] = depositIdToDeposit[depositIds[i]];
+    }
+    return deposits;
+  }
+
+  function getDepositsByReceiver(address receiver)
+    external
+    view
+    returns (TimeLockDeposit[] memory)
+  {
+    uint256[] memory depositIds = _receiverAddressToDepositIds[receiver];
+    TimeLockDeposit[] memory deposits = new TimeLockDeposit[](
+      depositIds.length
+    );
+    for (uint256 i = 0; i < deposits.length; ++i) {
+      deposits[i] = depositIdToDeposit[depositIds[i]];
+    }
+    return deposits;
+  }
 
   function createEthTimeLockDeposit(
     address payable receiver,
@@ -67,10 +97,10 @@ contract TimeVault is ERC2771Context {
       false
     );
     depositIdToDeposit[timeLockDeposit.depositId] = timeLockDeposit;
-    depositorAddressToDeposits[timeLockDeposit.depositor].push(
+    _depositorAddressToDepositIds[timeLockDeposit.depositor].push(
       timeLockDeposit.depositId
     );
-    receiverAddressToDeposits[timeLockDeposit.receiver].push(
+    _receiverAddressToDepositIds[timeLockDeposit.receiver].push(
       timeLockDeposit.depositId
     );
     _nextDepositId += 1;
@@ -109,10 +139,10 @@ contract TimeVault is ERC2771Context {
       false
     );
     depositIdToDeposit[timeLockDeposit.depositId] = timeLockDeposit;
-    depositorAddressToDeposits[timeLockDeposit.depositor].push(
+    _depositorAddressToDepositIds[timeLockDeposit.depositor].push(
       timeLockDeposit.depositId
     );
-    receiverAddressToDeposits[timeLockDeposit.receiver].push(
+    _receiverAddressToDepositIds[timeLockDeposit.receiver].push(
       timeLockDeposit.depositId
     );
     _nextDepositId += 1;
