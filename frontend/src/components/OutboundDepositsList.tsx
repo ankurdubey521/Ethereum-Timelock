@@ -4,13 +4,13 @@ import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import { useWeb3React } from "@web3-react/core";
 
-import InboundDepositCard from "./InboundDepositCard";
 import { TimeVaultUtil } from "../ethereum/TimeVaultUtil";
 import { ITimeLockDeposit } from "../types/interfaces";
+import OutboundDepositCard from "./OutboundDepositCard";
 
-export default function InboundDepositsList(): JSX.Element {
+export default function OutboundDepositsList(): JSX.Element {
   const { account, library, chainId } = useWeb3React();
-  const [inboundDeposits, setInboundDeposits] = useState<ITimeLockDeposit[]>(
+  const [outboundDeposits, setOutboundDeposits] = useState<ITimeLockDeposit[]>(
     []
   );
 
@@ -18,7 +18,7 @@ export default function InboundDepositsList(): JSX.Element {
     try {
       (async () => {
         const timeVaultUtil = new TimeVaultUtil(library.getSigner(account));
-        const deposits = await timeVaultUtil.getDepositsByReceiver(
+        const deposits = await timeVaultUtil.getDepositsByDepositor(
           account as string
         );
         deposits.sort(
@@ -26,7 +26,7 @@ export default function InboundDepositsList(): JSX.Element {
             b.minimumReleaseTimestamp.toNumber() -
             a.minimumReleaseTimestamp.toNumber()
         );
-        setInboundDeposits(deposits);
+        setOutboundDeposits(deposits);
       })();
     } catch (e) {
       console.error("Failed to fetch inbound deposits: ", e);
@@ -37,12 +37,12 @@ export default function InboundDepositsList(): JSX.Element {
     <Grid container spacing={1}>
       <Grid item xs={12}>
         <Paper>
-          <Typography>Inbound Deposits</Typography>
+          <Typography>Outbound Deposits</Typography>
         </Paper>
       </Grid>
-      {inboundDeposits.map((deposit) => (
+      {outboundDeposits.map((deposit) => (
         <Grid item xs={12}>
-          <InboundDepositCard deposit={deposit} />
+          <OutboundDepositCard deposit={deposit} />
         </Grid>
       ))}
     </Grid>

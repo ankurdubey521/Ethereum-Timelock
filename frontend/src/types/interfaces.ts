@@ -18,3 +18,7 @@ export interface ITimeLockDeposit {
 export interface IInboundDepositProps {
   deposit: ITimeLockDeposit;
 }
+
+export interface IOutboundDepositProps {
+  deposit: ITimeLockDeposit;
+}
