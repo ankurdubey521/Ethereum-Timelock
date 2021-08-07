@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
-import LinearProgress from "@material-ui/core/LinearProgress";
 import MuiAlert, { AlertProps } from "@material-ui/lab/Alert";
 import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
@@ -30,12 +29,16 @@ export default function CreateDepositDialog(): JSX.Element {
   const [open, setOpen] = useState(false);
   const [recipientAddress, setRecipientAddress] = useState<string>("");
   const [tokenAddress, setTokenAddress] = useState<string>("");
-  const [unlockDate, setUnlockDate] = useState<Date | null>(new Date());
+  const [unlockDate, setUnlockDate] = useState<Date>(new Date());
   const [depositType, setDepositType] = useState<TimeLockDepositType>(
     TimeLockDepositType.ETH
   );
   const [amount, setAmount] = useState<number>(0);
   const [statusMessage, setStatusMessage] = useState<string>("");
+  const [balance, setBalance] = useState<Decimal>(new Decimal(0));
+
+  const isValidEthAddress = (address: string): boolean =>
+    /^0x[a-fA-F0-9]{40}$/.test(address);
 
   const toIsoString = (date: Date): string => {
     var tzo = -date.getTimezoneOffset(),
@@ -122,6 +125,36 @@ export default function CreateDepositDialog(): JSX.Element {
     }
   };
 
+  useEffect(() => {
+    (async () => {
+      if (depositType === TimeLockDepositType.ERC20) {
+        if (isValidEthAddress(tokenAddress)) {
+          try {
+            const erc20token = new ERC20Util(signer, tokenAddress as string);
+            const tokenBalance = await erc20token.balanceOf(account as string);
+            const decimals = await erc20token.decimals();
+            const actualBalance = new Decimal(tokenBalance.toString()).div(
+              new Decimal(10).pow(decimals)
+            );
+            setBalance(actualBalance);
+
+            setStatusMessage(`Token Balance: ${actualBalance.toFixed()}`);
+          } catch (e) {
+            setStatusMessage("Not a valid ERC20 token");
+          }
+        }
+      } else if (depositType === TimeLockDepositType.ETH) {
+        const ethBalance: ethers.BigNumber = await library.getBalance(account);
+
+        const actualBalance = new Decimal(ethBalance.toString()).div(
+          new Decimal(10).pow(18)
+        );
+        setBalance(actualBalance);
+        setStatusMessage(`ETH Balance: ${actualBalance.toFixed()}`);
+      }
+    })();
+  }, [depositType, tokenAddress]);
+
   return (
     <div>
       <Button
@@ -147,6 +180,8 @@ export default function CreateDepositDialog(): JSX.Element {
             type="text"
             fullWidth
             onChange={(event) => setRecipientAddress(event.target.value)}
+            required
+            error={!isValidEthAddress(recipientAddress)}
           />
           <FormControl>
             <RadioGroup
@@ -192,6 +227,8 @@ export default function CreateDepositDialog(): JSX.Element {
               type="text"
               fullWidth
               onChange={(event) => setTokenAddress(event.target.value)}
+              required
+              error={!isValidEthAddress(tokenAddress)}
             />
           )}
           <TextField
@@ -203,6 +240,9 @@ export default function CreateDepositDialog(): JSX.Element {
             defaultValue={toIsoString(new Date()).slice(0, 19)}
             fullWidth
             onChange={(event) => setUnlockDate(new Date(event.target.value))}
+            required
+            helperText="Must be in future"
+            error={unlockDate.getSeconds() < new Date().getSeconds()}
           />
           <TextField
             autoFocus
@@ -212,6 +252,8 @@ export default function CreateDepositDialog(): JSX.Element {
             type="number"
             fullWidth
             onChange={(event) => setAmount(parseFloat(event.target.value))}
+            required
+            error={balance.lessThan(amount)}
           />
         </DialogContent>
         <DialogActions>
@@ -230,12 +272,7 @@ export default function CreateDepositDialog(): JSX.Element {
             Create
           </Button>
         </DialogActions>
-        {statusMessage !== "" && (
-          <>
-            <Alert severity="info">{statusMessage}</Alert>
-            <LinearProgress />
-          </>
-        )}
+        {statusMessage !== "" && <Alert severity="info">{statusMessage}</Alert>}
       </Dialog>
     </div>
   );
