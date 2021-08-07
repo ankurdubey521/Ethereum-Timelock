@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import { Web3ReactProvider, createWeb3ReactRoot } from "@web3-react/core";
+import { Web3ReactProvider } from "@web3-react/core";
 import { ethers } from "ethers";
 
 import { ProviderContext } from "./context/providercontext";

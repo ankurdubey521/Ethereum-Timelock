@@ -66,7 +66,7 @@ export default function OutboundDepositCard(props: IOutboundDepositProps) {
   }, [decimals]);
 
   return (
-    <Card className={classes.root}>
+    <Card className={classes.root} variant="outlined">
       <CardContent>
         <Typography variant="h6" component="h2">
           {displayAmount != null && <>{displayAmount.toString()}</>}{" "}
@@ -75,6 +75,7 @@ export default function OutboundDepositCard(props: IOutboundDepositProps) {
             : "Tokens"}
         </Typography>
         <Typography className={classes.pos} color="textSecondary">
+          Deposit ID: {props.deposit.depositId.toString()}
           Sent To: {props.deposit.receiver}
         </Typography>
         {props.deposit.depositType === TimeLockDepositType.ERC20 && (

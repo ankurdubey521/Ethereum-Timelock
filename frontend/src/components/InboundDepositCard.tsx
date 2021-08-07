@@ -28,6 +28,9 @@ const useStyles = makeStyles({
   p: {
     marginTop: 10,
   },
+  content: {
+    paddingBottom: 0,
+  },
 });
 
 export default function InboundDepositCard(props: IInboundDepositProps) {
@@ -87,8 +90,8 @@ export default function InboundDepositCard(props: IInboundDepositProps) {
   };
 
   return (
-    <Card className={classes.root}>
-      <CardContent>
+    <Card className={classes.root} variant="outlined">
+      <CardContent className={classes.content}>
         <Typography variant="h6" component="h2">
           {displayAmount != null && <>{displayAmount.toString()}</>}{" "}
           {props.deposit.depositType === TimeLockDepositType.ETH
@@ -96,6 +99,8 @@ export default function InboundDepositCard(props: IInboundDepositProps) {
             : "Tokens"}
         </Typography>
         <Typography className={classes.pos} color="textSecondary">
+          Deposit ID: {props.deposit.depositId.toString()}
+          <br />
           Sender: {props.deposit.depositor}
         </Typography>
         {props.deposit.depositType === TimeLockDepositType.ERC20 && (
@@ -124,19 +129,21 @@ export default function InboundDepositCard(props: IInboundDepositProps) {
           )}
         </Typography>
       </CardContent>
-      <CardActions>
-        <Button
-          size="small"
-          onClick={claim}
-          disabled={
-            props.deposit.claimed ||
-            props.deposit.minimumReleaseTimestamp.toNumber() >
-              (new Date().getTime() as number) / 1000
-          }
-        >
-          Claim
-        </Button>
-      </CardActions>
+      {props.deposit.claimed || (
+        <CardActions>
+          <Button
+            size="small"
+            onClick={claim}
+            disabled={
+              props.deposit.claimed ||
+              props.deposit.minimumReleaseTimestamp.toNumber() >
+                (new Date().getTime() as number) / 1000
+            }
+          >
+            Claim
+          </Button>
+        </CardActions>
+      )}
       {loading && <LinearProgress />}
     </Card>
   );
