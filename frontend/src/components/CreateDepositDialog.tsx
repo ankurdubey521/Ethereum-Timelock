@@ -1,5 +1,7 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import Button from "@material-ui/core/Button";
+import LinearProgress from "@material-ui/core/LinearProgress";
+import MuiAlert, { AlertProps } from "@material-ui/lab/Alert";
 import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -11,17 +13,24 @@ import { ethers } from "ethers";
 
 import { TimeVaultUtil } from "../ethereum/TimeVaultUtil";
 import { ERC20Util } from "../ethereum/ERC20Util";
-import { ProviderContext } from "../context/providercontext";
+import { TimeLockDepositType } from "../types/interfaces";
+
+function Alert(props: AlertProps) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 export default function CreateDepositDialog(): JSX.Element {
   const { library, account } = useWeb3React();
-  const { websocketProvider } = useContext(ProviderContext);
   const signer: ethers.Signer = library.getSigner(account);
   const [open, setOpen] = useState(false);
   const [recipientAddress, setRecipientAddress] = useState<string>("");
   const [tokenAddress, setTokenAddress] = useState<string>("");
   const [unlockDate, setUnlockDate] = useState<Date | null>(new Date());
+  const [depositType, setDepositType] = useState<TimeLockDepositType>(
+    TimeLockDepositType.ETH
+  );
   const [amount, setAmount] = useState<number>(0);
+  const [statusMessage, setStatusMessage] = useState<string>("");
 
   const toIsoString = (date: Date): string => {
     var tzo = -date.getTimezoneOffset(),
@@ -66,27 +75,35 @@ export default function CreateDepositDialog(): JSX.Element {
         new Decimal(amount).mul(new Decimal(10).pow(decimals)).toFixed()
       );
       const timeVaultUtil = new TimeVaultUtil(signer);
+      setStatusMessage("Processing Token Approval...");
       await erc20token.approve(
         process.env.REACT_APP_CONTRACT_ADDRESS as string,
         actualTokenAmount
       );
 
+      setStatusMessage("Creating Deposit...");
       await timeVaultUtil.createErc20TimeLockDeposit(
         recipientAddress as string,
         Math.floor((unlockDate?.getTime() as number) / 1000),
         tokenAddress as string,
         actualTokenAmount
       );
-      //}
-      //);
+      setStatusMessage("");
+      handleClose();
+      window.location.reload(false);
     } catch (e) {
-      console.error(e);
+      console.error("Error Creating ERC20 Deposit: ", e);
     }
   };
 
   return (
     <div>
-      <Button variant="outlined" color="primary" onClick={handleClickOpen}>
+      <Button
+        variant="outlined"
+        color="primary"
+        fullWidth
+        onClick={handleClickOpen}
+      >
         Create Deposit
       </Button>
       <Dialog
@@ -142,6 +159,12 @@ export default function CreateDepositDialog(): JSX.Element {
             Create
           </Button>
         </DialogActions>
+        {statusMessage !== "" && (
+          <>
+            <Alert severity="info">{statusMessage}</Alert>
+            <LinearProgress />
+          </>
+        )}
       </Dialog>
     </div>
   );

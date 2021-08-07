@@ -6,6 +6,7 @@ import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import Countdown from "react-countdown";
+import LinearProgress from "@material-ui/core/LinearProgress";
 import { Decimal } from "decimal.js";
 import { useWeb3React } from "@web3-react/core";
 
@@ -38,6 +39,7 @@ export default function InboundDepositCard(props: IInboundDepositProps) {
 
   const [decimals, setDecimals] = useState<number | null>(null);
   const [displayAmount, setDisplayAmount] = useState<Decimal | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -71,12 +73,14 @@ export default function InboundDepositCard(props: IInboundDepositProps) {
   }, [decimals]);
 
   const claim = async () => {
-    //const timeVaultUtil = new TimeVaultUtil(library.getSigner(account));
     if (biconomyInitialized) {
       const timeVaultUtil = new TimeVaultUtil(
         biconomyLibrary.getSigner(biconomyAccount)
       );
+      setLoading(true);
       await timeVaultUtil.claimDeposit(props.deposit.depositId);
+      setLoading(false);
+      window.location.reload(false);
     } else {
       console.log("Biconomy Not Initialized");
     }
@@ -133,6 +137,7 @@ export default function InboundDepositCard(props: IInboundDepositProps) {
           Claim
         </Button>
       </CardActions>
+      {loading && <LinearProgress />}
     </Card>
   );
 }

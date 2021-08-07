@@ -12,6 +12,9 @@ export class ERC20Util {
 
   decimals = async (): Promise<number> => this.contract.decimals();
 
+  balanceOf = async (address: string): Promise<ethers.BigNumber> =>
+    this.contract.balanceOf(address);
+
   approve = async (spender: string, amount: ethers.BigNumber) => {
     const { wait } = await this.contract.approve(spender, amount);
     await wait();
