@@ -76,6 +76,7 @@ export default function OutboundDepositCard(props: IOutboundDepositProps) {
         </Typography>
         <Typography className={classes.pos} color="textSecondary">
           Deposit ID: {props.deposit.depositId.toString()}
+          <br />
           Sent To: {props.deposit.receiver}
         </Typography>
         {props.deposit.depositType === TimeLockDepositType.ERC20 && (
