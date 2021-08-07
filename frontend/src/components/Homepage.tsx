@@ -17,7 +17,7 @@ const useStyles = makeStyles({
 const Homepage = (): JSX.Element => {
   const classes = useStyles();
   const { account, chainId } = useWeb3React();
-  if (chainId !== 42) {
+  if (account && chainId !== 42) {
     return <div>This demo works only on Kovan Test Network</div>;
   }
   return (

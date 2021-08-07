@@ -137,7 +137,6 @@ export default function CreateDepositDialog(): JSX.Element {
               new Decimal(10).pow(decimals)
             );
             setBalance(actualBalance);
-
             setStatusMessage(`Token Balance: ${actualBalance.toFixed()}`);
           } catch (e) {
             setStatusMessage("Not a valid ERC20 token");
@@ -175,7 +174,6 @@ export default function CreateDepositDialog(): JSX.Element {
           <TextField
             autoFocus
             margin="dense"
-            id="name"
             label="Recipient Address"
             type="text"
             fullWidth
@@ -222,7 +220,6 @@ export default function CreateDepositDialog(): JSX.Element {
             <TextField
               autoFocus
               margin="dense"
-              id="name"
               label="Token"
               type="text"
               fullWidth
@@ -234,7 +231,6 @@ export default function CreateDepositDialog(): JSX.Element {
           <TextField
             autoFocus
             margin="dense"
-            id="name"
             label="Unlock Date"
             type="datetime-local"
             defaultValue={toIsoString(new Date()).slice(0, 19)}
@@ -242,12 +238,11 @@ export default function CreateDepositDialog(): JSX.Element {
             onChange={(event) => setUnlockDate(new Date(event.target.value))}
             required
             helperText="Must be in future"
-            error={unlockDate.getSeconds() < new Date().getSeconds()}
+            error={unlockDate.getTime() < new Date().getTime()}
           />
           <TextField
             autoFocus
             margin="dense"
-            id="name"
             label="Amount"
             type="number"
             fullWidth
